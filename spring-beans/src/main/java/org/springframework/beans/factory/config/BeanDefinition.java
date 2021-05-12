@@ -38,40 +38,22 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.beans.factory.support.RootBeanDefinition
  * @see org.springframework.beans.factory.support.ChildBeanDefinition
  */
+// Bean定义接口，包含一个Bean几乎所有的信息
+// BeanDefinition描述了一个bean实例，该实例具有属性值，构造函数参数值以及具体实现所提供的更多信息。
+// 这只是一个最小的接口：主要目的是允许BeanFactoryPostProcessor内省和修改属性值和其他bean元数据
 public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 
-	/**
-	 * Scope identifier for the standard singleton scope: {@value}.
-	 * <p>Note that extended bean factories might support further scopes.
-	 * @see #setScope
-	 * @see ConfigurableBeanFactory#SCOPE_SINGLETON
-	 */
+	// 单例 singleton
 	String SCOPE_SINGLETON = ConfigurableBeanFactory.SCOPE_SINGLETON;
 
-	/**
-	 * Scope identifier for the standard prototype scope: {@value}.
-	 * <p>Note that extended bean factories might support further scopes.
-	 * @see #setScope
-	 * @see ConfigurableBeanFactory#SCOPE_PROTOTYPE
-	 */
+	// prototype
 	String SCOPE_PROTOTYPE = ConfigurableBeanFactory.SCOPE_PROTOTYPE;
 
 
-	/**
-	 * Role hint indicating that a {@code BeanDefinition} is a major part
-	 * of the application. Typically corresponds to a user-defined bean.
-	 */
+	// 角色提示，指示BeanDefinition是应用程序的主要部分。 通常对应于用户定义的bean
 	int ROLE_APPLICATION = 0;
 
-	/**
-	 * Role hint indicating that a {@code BeanDefinition} is a supporting
-	 * part of some larger configuration, typically an outer
-	 * {@link org.springframework.beans.factory.parsing.ComponentDefinition}.
-	 * {@code SUPPORT} beans are considered important enough to be aware
-	 * of when looking more closely at a particular
-	 * {@link org.springframework.beans.factory.parsing.ComponentDefinition},
-	 * but not when looking at the overall configuration of an application.
-	 */
+	// 角色提示
 	int ROLE_SUPPORT = 1;
 
 	/**
@@ -85,25 +67,15 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 
 	// Modifiable attributes
 
-	/**
-	 * Set the name of the parent definition of this bean definition, if any.
-	 */
+	// 设置父类名称
 	void setParentName(@Nullable String parentName);
 
-	/**
-	 * Return the name of the parent definition of this bean definition, if any.
-	 */
+	// 获取父类名称
 	@Nullable
 	String getParentName();
 
-	/**
-	 * Specify the bean class name of this bean definition.
-	 * <p>The class name can be modified during bean factory post-processing,
-	 * typically replacing the original class name with a parsed variant of it.
-	 * @see #setParentName
-	 * @see #setFactoryBeanName
-	 * @see #setFactoryMethodName
-	 */
+	// 设置bean的class名称
+	// 可以在bean工厂后处理期间修改类名
 	void setBeanClassName(@Nullable String beanClassName);
 
 	/**
@@ -118,6 +90,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * @see #getFactoryBeanName()
 	 * @see #getFactoryMethodName()
 	 */
+	// 返回bean的class名
 	@Nullable
 	String getBeanClassName();
 

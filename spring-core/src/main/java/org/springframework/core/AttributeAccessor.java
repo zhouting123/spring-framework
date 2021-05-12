@@ -29,6 +29,8 @@ import org.springframework.util.Assert;
  * @author Sam Brannen
  * @since 2.0
  */
+// 用于获取元数据，在实现类（eg:AttributeAccessorSupport）中通过LinkHashMap集合保存元素据。
+// 例如：通过XML的<meta>标签定义的一些元数据会保存其中
 public interface AttributeAccessor {
 
 	/**
@@ -40,6 +42,7 @@ public interface AttributeAccessor {
 	 * @param name the unique attribute key
 	 * @param value the attribute value to be attached
 	 */
+	// 设置属性值
 	void setAttribute(String name, @Nullable Object value);
 
 	/**
@@ -49,6 +52,7 @@ public interface AttributeAccessor {
 	 * @return the current value of the attribute, if any
 	 */
 	@Nullable
+	// 获取属性值
 	Object getAttribute(String name);
 
 	/**
@@ -69,6 +73,9 @@ public interface AttributeAccessor {
 	 * @see #setAttribute(String, Object)
 	 * @since 5.3.3
 	 */
+	//如有必要，为由name标识的属性计算一个新值，并在此AttributeAccessor 设置新值。
+	//如果此AttributeAccessor已经存在通过name标识的AttributeAccessor的值，则将不使用提供的计算功能而返回现有值。
+	//此方法的默认实现不是线程安全的，但可以被此接口的具体实现覆盖。
 	@SuppressWarnings("unchecked")
 	default <T> T computeAttribute(String name, Function<String, T> computeFunction) {
 		Assert.notNull(name, "Name must not be null");
@@ -89,6 +96,7 @@ public interface AttributeAccessor {
 	 * @param name the unique attribute key
 	 * @return the last value of the attribute, if any
 	 */
+	// 删除并返回属性值
 	@Nullable
 	Object removeAttribute(String name);
 
@@ -97,11 +105,13 @@ public interface AttributeAccessor {
 	 * <p>Otherwise return {@code false}.
 	 * @param name the unique attribute key
 	 */
+	// 判断属性是否存在
 	boolean hasAttribute(String name);
 
 	/**
 	 * Return the names of all attributes.
 	 */
+	//获取所有属性名
 	String[] attributeNames();
 
 }
