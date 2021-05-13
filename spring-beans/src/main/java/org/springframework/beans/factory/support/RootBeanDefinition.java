@@ -51,6 +51,11 @@ import org.springframework.util.Assert;
  * @see GenericBeanDefinition
  * @see ChildBeanDefinition
  */
+
+// 继承 AbstractBeanDefinition 抽象类，表示合并后的 BeanDefinition 对象。
+// 在 Spring BeanFactory 初始化 Bean 的前阶段，会根据 BeanDefinition 生成一个
+// RootBeanDefinition（具有层次性则会进行合并），用于后续实例化和初始化
+
 @SuppressWarnings("serial")
 public class RootBeanDefinition extends AbstractBeanDefinition {
 

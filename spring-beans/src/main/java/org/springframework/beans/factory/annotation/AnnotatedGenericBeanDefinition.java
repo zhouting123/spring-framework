@@ -40,6 +40,9 @@ import org.springframework.util.Assert;
  * @see AnnotatedBeanDefinition#getMetadata()
  * @see org.springframework.core.type.StandardAnnotationMetadata
  */
+
+// 和 ScannedGenericBeanDefinition 类似，通过 @Import 导入的 Configuration Class 会解析成该对象
+
 @SuppressWarnings("serial")
 public class AnnotatedGenericBeanDefinition extends GenericBeanDefinition implements AnnotatedBeanDefinition {
 

@@ -37,6 +37,9 @@ import org.springframework.util.ObjectUtils;
  * @see RootBeanDefinition
  * @see ChildBeanDefinition
  */
+
+// 继承 AbstractBeanDefinition 抽象类，多了一个 parentName，表示有继承关系，
+// 是一个标准 Bean 元信息对象，通过 XML 定义的 Bean 会解析成该对象
 @SuppressWarnings("serial")
 public class GenericBeanDefinition extends AbstractBeanDefinition {
 

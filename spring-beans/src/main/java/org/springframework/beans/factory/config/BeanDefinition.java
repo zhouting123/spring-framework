@@ -78,73 +78,35 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	// 可以在bean工厂后处理期间修改类名
 	void setBeanClassName(@Nullable String beanClassName);
 
-	/**
-	 * Return the current bean class name of this bean definition.
-	 * <p>Note that this does not have to be the actual class name used at runtime, in
-	 * case of a child definition overriding/inheriting the class name from its parent.
-	 * Also, this may just be the class that a factory method is called on, or it may
-	 * even be empty in case of a factory bean reference that a method is called on.
-	 * Hence, do <i>not</i> consider this to be the definitive bean type at runtime but
-	 * rather only use it for parsing purposes at the individual bean definition level.
-	 * @see #getParentName()
-	 * @see #getFactoryBeanName()
-	 * @see #getFactoryMethodName()
-	 */
 	// 返回bean的class名
 	@Nullable
 	String getBeanClassName();
 
-	/**
-	 * Override the target scope of this bean, specifying a new scope name.
-	 * @see #SCOPE_SINGLETON
-	 * @see #SCOPE_PROTOTYPE
-	 */
+	// 设置作用域
 	void setScope(@Nullable String scope);
 
-	/**
-	 * Return the name of the current target scope for this bean,
-	 * or {@code null} if not known yet.
-	 */
+	// 获取作用域
 	@Nullable
 	String getScope();
 
-	/**
-	 * Set whether this bean should be lazily initialized.
-	 * <p>If {@code false}, the bean will get instantiated on startup by bean
-	 * factories that perform eager initialization of singletons.
-	 */
+	// 设置bean懒加载
 	void setLazyInit(boolean lazyInit);
 
-	/**
-	 * Return whether this bean should be lazily initialized, i.e. not
-	 * eagerly instantiated on startup. Only applicable to a singleton bean.
-	 */
+	// 是否是懒加载
 	boolean isLazyInit();
 
-	/**
-	 * Set the names of the beans that this bean depends on being initialized.
-	 * The bean factory will guarantee that these beans get initialized first.
-	 */
+	// 设置Bean的依赖
 	void setDependsOn(@Nullable String... dependsOn);
 
-	/**
-	 * Return the bean names that this bean depends on.
-	 */
+	// 获取bean的依赖
 	@Nullable
 	String[] getDependsOn();
 
-	/**
-	 * Set whether this bean is a candidate for getting autowired into some other bean.
-	 * <p>Note that this flag is designed to only affect type-based autowiring.
-	 * It does not affect explicit references by name, which will get resolved even
-	 * if the specified bean is not marked as an autowire candidate. As a consequence,
-	 * autowiring by name will nevertheless inject a bean if the name matches.
-	 */
+
+	// 设置bean是否自动注入到其他bean
 	void setAutowireCandidate(boolean autowireCandidate);
 
-	/**
-	 * Return whether this bean is a candidate for getting autowired into some other bean.
-	 */
+	// 是否可以自动注入到其他bean
 	boolean isAutowireCandidate();
 
 	/**
@@ -152,6 +114,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * <p>If this value is {@code true} for exactly one bean among multiple
 	 * matching candidates, it will serve as a tie-breaker.
 	 */
+	// 设置bean是否是主要的自动注入对象
 	void setPrimary(boolean primary);
 
 	/**
@@ -159,17 +122,14 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 */
 	boolean isPrimary();
 
-	/**
-	 * Specify the factory bean to use, if any.
-	 * This the name of the bean to call the specified factory method on.
-	 * @see #setFactoryMethodName
-	 */
+	// 指定工厂bean
 	void setFactoryBeanName(@Nullable String factoryBeanName);
 
 	/**
 	 * Return the factory bean name, if any.
 	 */
 	@Nullable
+	// 获取工厂bean
 	String getFactoryBeanName();
 
 	/**
@@ -180,6 +140,7 @@ public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 	 * @see #setFactoryBeanName
 	 * @see #setBeanClassName
 	 */
+	// 指定工厂方法
 	void setFactoryMethodName(@Nullable String factoryMethodName);
 
 	/**
