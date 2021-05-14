@@ -23,6 +23,7 @@ package org.springframework.core;
  * @author Juergen Hoeller
  * @since 2.5.2
  */
+// 别名注册中心
 public interface AliasRegistry {
 
 	/**
@@ -32,6 +33,7 @@ public interface AliasRegistry {
 	 * @throws IllegalStateException if the alias is already in use
 	 * and may not be overridden
 	 */
+	// 注册一个别名
 	void registerAlias(String name, String alias);
 
 	/**
@@ -39,6 +41,7 @@ public interface AliasRegistry {
 	 * @param alias the alias to remove
 	 * @throws IllegalStateException if no such alias was found
 	 */
+	// 移除别名
 	void removeAlias(String alias);
 
 	/**
@@ -47,6 +50,7 @@ public interface AliasRegistry {
 	 * @param name the name to check
 	 * @return whether the given name is an alias
 	 */
+	// 指定名称是否为别名
 	boolean isAlias(String name);
 
 	/**
@@ -54,6 +58,7 @@ public interface AliasRegistry {
 	 * @param name the name to check for aliases
 	 * @return the aliases, or an empty array if none
 	 */
+	// 返回指定名称的别名列表
 	String[] getAliases(String name);
 
 }

@@ -44,6 +44,7 @@ public interface BeanDefinitionReader {
 	 * <p>The factory is exposed through the BeanDefinitionRegistry interface,
 	 * encapsulating the methods that are relevant for bean definition handling.
 	 */
+	//返回beanDefinition注册中心
 	BeanDefinitionRegistry getRegistry();
 
 	/**
@@ -63,6 +64,7 @@ public interface BeanDefinitionReader {
 	 * @see #loadBeanDefinitions(String)
 	 * @see org.springframework.core.io.support.ResourcePatternResolver
 	 */
+	// 返回资源加载器
 	@Nullable
 	ResourceLoader getResourceLoader();
 
@@ -72,6 +74,7 @@ public interface BeanDefinitionReader {
 	 * but rather to just register bean definitions with class names,
 	 * with the corresponding Classes to be resolved later (or never).
 	 */
+	// 获取资源加载器
 	@Nullable
 	ClassLoader getBeanClassLoader();
 
@@ -88,6 +91,7 @@ public interface BeanDefinitionReader {
 	 * @return the number of bean definitions found
 	 * @throws BeanDefinitionStoreException in case of loading or parsing errors
 	 */
+	// 从resource中加载 beanDefinition
 	int loadBeanDefinitions(Resource resource) throws BeanDefinitionStoreException;
 
 	/**

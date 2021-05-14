@@ -25,9 +25,11 @@ import org.springframework.lang.Nullable;
  * @author Juergen Hoeller
  * @since 2.0
  */
-// 用于获取定义Bean的源对象，在实现类中通过Object对象保存。
-// 所谓源对象就是定义这个Bean的资源（XML标签对象或者.class文件资源对象）
+
 public interface BeanMetadataElement {
+// 用于获取定义Bean的源对象，在实现类中通过Object对象保存
+// 所谓源对象就是定义这个Bean的资源 (XML标签对象或者.class文件资源对象)
+
 
 	/**
 	 * Return the configuration source {@code Object} for this metadata element
