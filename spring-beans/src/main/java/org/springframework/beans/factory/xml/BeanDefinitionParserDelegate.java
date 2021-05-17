@@ -378,9 +378,13 @@ public class BeanDefinitionParserDelegate {
 	 */
 	public BeanDefinitionDefaults getBeanDefinitionDefaults() {
 		BeanDefinitionDefaults bdd = new BeanDefinitionDefaults();
+		// 设置默认懒加载
 		bdd.setLazyInit(TRUE_VALUE.equalsIgnoreCase(this.defaults.getLazyInit()));
+		// 设置默认自动装配模式
 		bdd.setAutowireMode(getAutowireMode(DEFAULT_VALUE));
+		// 设置默认初始化方法
 		bdd.setInitMethodName(this.defaults.getInitMethod());
+		// 设置默认销毁方法
 		bdd.setDestroyMethodName(this.defaults.getDestroyMethod());
 		return bdd;
 	}
@@ -425,7 +429,7 @@ public class BeanDefinitionParserDelegate {
 			// 加入name别名数组中
 			aliases.addAll(Arrays.asList(nameArr));
 		}
-
+		// 设置 Bean 的名称，优先 `id` 属性，其次 `name` 属性
 		String beanName = id;
 		if (!StringUtils.hasText(beanName) && !aliases.isEmpty()) {
 			beanName = aliases.remove(0);
@@ -434,20 +438,23 @@ public class BeanDefinitionParserDelegate {
 						"' as bean name and " + aliases + " as aliases");
 			}
 		}
-
+		// 检查beanName唯一性
 		if (containingBean == null) {
 			checkNameUniqueness(beanName, aliases, ele);
 		}
-
+		// 【核心】创建一个AbstractBeanDefinition
 		AbstractBeanDefinition beanDefinition = parseBeanDefinitionElement(ele, beanName, containingBean);
 		if (beanDefinition != null) {
+			// 如果beanName为空，则根据class对象名称生成一个
 			if (!StringUtils.hasText(beanName)) {
 				try {
+					// 内部bean
 					if (containingBean != null) {
 						beanName = BeanDefinitionReaderUtils.generateBeanName(
 								beanDefinition, this.readerContext.getRegistry(), true);
 					}
 					else {
+						// 生成的唯一的 beanName
 						beanName = this.readerContext.generateBeanName(beanDefinition);
 						// Register an alias for the plain bean class name, if still possible,
 						// if the generator returned the class name plus a suffix.
@@ -469,6 +476,7 @@ public class BeanDefinitionParserDelegate {
 					return null;
 				}
 			}
+			// 生成BeanDefinitionHolder对象
 			String[] aliasesArray = StringUtils.toStringArray(aliases);
 			return new BeanDefinitionHolder(beanDefinition, beanName, aliasesArray);
 		}
@@ -507,30 +515,40 @@ public class BeanDefinitionParserDelegate {
 
 		this.parseState.push(new BeanEntry(beanName));
 
+		// class属性
 		String className = null;
 		if (ele.hasAttribute(CLASS_ATTRIBUTE)) {
 			className = ele.getAttribute(CLASS_ATTRIBUTE).trim();
 		}
+		// 父类属性
 		String parent = null;
 		if (ele.hasAttribute(PARENT_ATTRIBUTE)) {
 			parent = ele.getAttribute(PARENT_ATTRIBUTE);
 		}
 
 		try {
+			// 根据className、父类 创建AbstractBeanDefinition
 			AbstractBeanDefinition bd = createBeanDefinition(className, parent);
-
+			// 解析设置bean的各种属性
 			parseBeanDefinitionAttributes(ele, beanName, containingBean, bd);
+			// 设置 description
 			bd.setDescription(DomUtils.getChildElementValueByTagName(ele, DESCRIPTION_ELEMENT));
-
+			// 解析<meta/>标签
 			parseMetaElements(ele, bd);
+			// 解析<lookup-method/>标签
 			parseLookupOverrideSubElements(ele, bd.getMethodOverrides());
+			// 解析<replaced-method/>标签
 			parseReplacedMethodSubElements(ele, bd.getMethodOverrides());
-
+			// 解析 `<constructor-arg />` 构造函数的参数集合标签
 			parseConstructorArgElements(ele, bd);
+			// 解析 `<property />` 属性标签
 			parsePropertyElements(ele, bd);
+			// 解析 `<qualifier />` 标签
 			parseQualifierElements(ele, bd);
 
+			// 设置 Bean 的 `resource` 资源为 XML 文件资源
 			bd.setResource(this.readerContext.getResource());
+			// 设置 Bean 的 `source` 来源为 `<bean />` 标签对象
 			bd.setSource(extractSource(ele));
 
 			return bd;
@@ -1371,6 +1389,7 @@ public class BeanDefinitionParserDelegate {
 	 * @param ele the element to parse
 	 * @return the resulting bean definition
 	 */
+	// 解析自定义元素
 	@Nullable
 	public BeanDefinition parseCustomElement(Element ele) {
 		return parseCustomElement(ele, null);
@@ -1384,15 +1403,18 @@ public class BeanDefinitionParserDelegate {
 	 */
 	@Nullable
 	public BeanDefinition parseCustomElement(Element ele, @Nullable BeanDefinition containingBd) {
+		// 获取元素的命名空间uri
 		String namespaceUri = getNamespaceURI(ele);
 		if (namespaceUri == null) {
 			return null;
 		}
+		// 获取命名空间处理器
 		NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);
 		if (handler == null) {
 			error("Unable to locate Spring NamespaceHandler for XML schema namespace [" + namespaceUri + "]", ele);
 			return null;
 		}
+		// 使用处理器解析元素，并返回BeanDefinition
 		return handler.parse(ele, new ParserContext(this.readerContext, this, containingBd));
 	}
 

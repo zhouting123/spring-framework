@@ -324,10 +324,12 @@ public class DefaultBeanDefinitionDocumentReader implements BeanDefinitionDocume
 	 */
 	// 处理bean元素，解析bean定义，并注册到注册中心
 	protected void processBeanDefinition(Element ele, BeanDefinitionParserDelegate delegate) {
+		// <1> 使用委托类，解析beanDefinition
 		BeanDefinitionHolder bdHolder = delegate.parseBeanDefinitionElement(ele);
 		if (bdHolder != null) {
 			bdHolder = delegate.decorateBeanDefinitionIfRequired(ele, bdHolder);
 			try {
+				// <2> 将beanDefinition注册到注册中心
 				// Register the final decorated instance.
 				BeanDefinitionReaderUtils.registerBeanDefinition(bdHolder, getReaderContext().getRegistry());
 			}

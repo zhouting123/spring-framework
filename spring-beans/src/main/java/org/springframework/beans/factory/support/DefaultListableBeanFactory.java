@@ -242,6 +242,7 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	 * a different definition with the same name, automatically replacing the former.
 	 * @since 4.1.2
 	 */
+	// 是否可以通过相同bean名称来覆盖其他bean
 	public boolean isAllowBeanDefinitionOverriding() {
 		return this.allowBeanDefinitionOverriding;
 	}
@@ -972,13 +973,23 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 	// Implementation of BeanDefinitionRegistry interface
 	//---------------------------------------------------------------------
 
+	/* <1> 校验beanDefinition
+	 * <2> 从缓存中获取指定beanDefinition
+	 * <3> 缓存存在
+	 * 	<3.1> 不允许覆盖，则抛异常
+	 *  <3.2> 允许覆盖，则打印日志并覆盖
+	 * <4> 缓存不存在
+	 * 	<4.1> 已有bean注册成功，则对缓存map进行并发控制
+	 * 		  添加bean到缓存map中、替换原有的beanName列表，新建列表并加入新的beanName、从manualSingletonNames中移除beanName
+	 *  <4.2> 尚处在启动注册阶段，则直接加入到缓存map、beanName列表，并从manualSingletonNames中移除beanName
+	 */
 	@Override
 	public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition)
 			throws BeanDefinitionStoreException {
 
 		Assert.hasText(beanName, "Bean name must not be empty");
 		Assert.notNull(beanDefinition, "BeanDefinition must not be null");
-
+		// <1> 校验beanDefinition 主要是对属性 methodOverrides 进行校验
 		if (beanDefinition instanceof AbstractBeanDefinition) {
 			try {
 				((AbstractBeanDefinition) beanDefinition).validate();
@@ -988,12 +999,15 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 						"Validation of bean definition failed", ex);
 			}
 		}
-
+		// <2> 从缓存map中获取指定名称的beanDefinition
 		BeanDefinition existingDefinition = this.beanDefinitionMap.get(beanName);
+		// <3> 缓存存在
 		if (existingDefinition != null) {
+			 // 如果存在且不允许覆盖，则抛出异常
 			if (!isAllowBeanDefinitionOverriding()) {
 				throw new BeanDefinitionOverrideException(beanName, beanDefinition, existingDefinition);
 			}
+			// 下面都是允许覆盖时，打印相应的日志
 			else if (existingDefinition.getRole() < beanDefinition.getRole()) {
 				// e.g. was ROLE_APPLICATION, now overriding with ROLE_SUPPORT or ROLE_INFRASTRUCTURE
 				if (logger.isInfoEnabled()) {
@@ -1016,29 +1030,37 @@ public class DefaultListableBeanFactory extends AbstractAutowireCapableBeanFacto
 							"] with [" + beanDefinition + "]");
 				}
 			}
+			// 覆盖原有beanDefinition
 			this.beanDefinitionMap.put(beanName, beanDefinition);
 		}
+		// <4> 缓存不存在
 		else {
+			// <4.1> bean创建已经开始(即：在此期间是已有bean被标记为已创建)
 			if (hasBeanCreationStarted()) {
 				// Cannot modify startup-time collection elements anymore (for stable iteration)
 				synchronized (this.beanDefinitionMap) {
+					// 将bean加入缓存
 					this.beanDefinitionMap.put(beanName, beanDefinition);
+					// 替换掉原来的beanName注册列表，并加入新的beanName
 					List<String> updatedDefinitions = new ArrayList<>(this.beanDefinitionNames.size() + 1);
 					updatedDefinitions.addAll(this.beanDefinitionNames);
 					updatedDefinitions.add(beanName);
 					this.beanDefinitionNames = updatedDefinitions;
+					// 从manualSingletonName移除beanName
 					removeManualSingletonName(beanName);
 				}
 			}
+			// <4.2> bean还未开始创建
 			else {
-				// Still in startup registration phase
+				// Still in startup registration phase 仍处在启动注册阶段
+				// 加入缓存 加入beanName列表
 				this.beanDefinitionMap.put(beanName, beanDefinition);
 				this.beanDefinitionNames.add(beanName);
 				removeManualSingletonName(beanName);
 			}
 			this.frozenBeanDefinitionNames = null;
 		}
-
+		// 重置beanName缓存
 		if (existingDefinition != null || containsSingleton(beanName)) {
 			resetBeanDefinition(beanName);
 		}

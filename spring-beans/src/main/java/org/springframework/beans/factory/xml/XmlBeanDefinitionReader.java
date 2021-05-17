@@ -521,7 +521,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * @see BeanDefinitionDocumentReader#registerBeanDefinitions
 	 */
 	public int registerBeanDefinitions(Document doc, Resource resource) throws BeanDefinitionStoreException {
-		// 创建一个BeanDefinition文档阅读器
+		// 创建一个BeanDefinition reader对象
 		BeanDefinitionDocumentReader documentReader = createBeanDefinitionDocumentReader();
 		// 获取注册表以及已注册DeanDefinition数量
 		int countBefore = getRegistry().getBeanDefinitionCount();
@@ -553,6 +553,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * Lazily create a default NamespaceHandlerResolver, if not set before.
 	 * @see #createDefaultNamespaceHandlerResolver()
 	 */
+	// 获取命名空间处理解析器
 	public NamespaceHandlerResolver getNamespaceHandlerResolver() {
 		if (this.namespaceHandlerResolver == null) {
 			this.namespaceHandlerResolver = createDefaultNamespaceHandlerResolver();

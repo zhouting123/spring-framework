@@ -104,10 +104,7 @@ public class DocumentDefaultsDefinition implements DefaultsDefinition {
 		this.autowireCandidates = autowireCandidates;
 	}
 
-	/**
-	 * Return the default autowire-candidate pattern for the document that's currently parsed.
-	 * May also return a comma-separated list of patterns.
-	 */
+
 	@Nullable
 	public String getAutowireCandidates() {
 		return this.autowireCandidates;

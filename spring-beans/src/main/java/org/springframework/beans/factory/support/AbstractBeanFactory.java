@@ -1829,6 +1829,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 	 * @since 4.2.2
 	 * @see #markBeanAsCreated
 	 */
+	// bean创建是否已经开始，即在此期间是由已有bean被标记为已创建
 	protected boolean hasBeanCreationStarted() {
 		return !this.alreadyCreated.isEmpty();
 	}

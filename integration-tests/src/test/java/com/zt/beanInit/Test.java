@@ -12,8 +12,10 @@ public class Test {
 	public static void main(String[] args) {
 		// 创建bean容器
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
+		System.out.println("================创建bean容器结束================");
 		// 创建xml reader
 		XmlBeanDefinitionReader reader = new XmlBeanDefinitionReader(factory);
+		System.out.println("================创建 xml reader 结束================");
 		// class路径
 		String location = "classpath:com.zt/dependency-lookup-context.xml";
 		// 加载配置

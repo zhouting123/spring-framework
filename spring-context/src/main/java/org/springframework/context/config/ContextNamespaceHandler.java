@@ -32,6 +32,8 @@ public class ContextNamespaceHandler extends NamespaceHandlerSupport {
 
 	@Override
 	public void init() {
+		// 注册 beanDefinition 的 parser 解析器
+		// 即：将元素名称，和对应的解析器存入 Map<String, BeanDefinitionParser> parsers 中
 		registerBeanDefinitionParser("property-placeholder", new PropertyPlaceholderBeanDefinitionParser());
 		registerBeanDefinitionParser("property-override", new PropertyOverrideBeanDefinitionParser());
 		registerBeanDefinitionParser("annotation-config", new AnnotationConfigBeanDefinitionParser());

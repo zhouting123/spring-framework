@@ -33,7 +33,7 @@ import org.springframework.util.StringValueResolver;
 /**
  * Simple implementation of the {@link AliasRegistry} interface.
  * <p>Serves as base class for
- * {@link org.springframework.beans.factory.support.BeanDefinitionRegistry}
+ * {@link org.springframework.beans.factory.support}
  * implementations.
  *
  * @author Juergen Hoeller
@@ -54,6 +54,7 @@ public class SimpleAliasRegistry implements AliasRegistry {
 		Assert.hasText(name, "'name' must not be empty");
 		Assert.hasText(alias, "'alias' must not be empty");
 		synchronized (this.aliasMap) {
+			// 别名和 name 相同,则移除别名
 			if (alias.equals(name)) {
 				this.aliasMap.remove(alias);
 				if (logger.isDebugEnabled()) {
@@ -61,12 +62,15 @@ public class SimpleAliasRegistry implements AliasRegistry {
 				}
 			}
 			else {
+				// 获取 alias 已注册的 beanName
 				String registeredName = this.aliasMap.get(alias);
 				if (registeredName != null) {
+					// 已注册名称和 name 相同,停止此次别名注册
 					if (registeredName.equals(name)) {
 						// An existing alias - no need to re-register
 						return;
 					}
+					// 不能覆盖抛异常
 					if (!allowAliasOverriding()) {
 						throw new IllegalStateException("Cannot define alias '" + alias + "' for name '" +
 								name + "': It is already registered for name '" + registeredName + "'.");
@@ -76,7 +80,9 @@ public class SimpleAliasRegistry implements AliasRegistry {
 								registeredName + "' with new target name '" + name + "'");
 					}
 				}
+				// 校验循环指向
 				checkForAliasCircle(name, alias);
+				// 注册 alias
 				this.aliasMap.put(alias, name);
 				if (logger.isTraceEnabled()) {
 					logger.trace("Alias definition '" + alias + "' registered for name '" + name + "'");

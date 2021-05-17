@@ -67,10 +67,13 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	 * Parses the supplied {@link Element} by delegating to the {@link BeanDefinitionParser} that is
 	 * registered for that {@link Element}.
 	 */
+	// 获取对应元素解析器
 	@Override
 	@Nullable
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
+		// 获取解析器
 		BeanDefinitionParser parser = findParserForElement(element, parserContext);
+		// 解析为beanDefinition
 		return (parser != null ? parser.parse(element, parserContext) : null);
 	}
 
@@ -78,9 +81,12 @@ public abstract class NamespaceHandlerSupport implements NamespaceHandler {
 	 * Locates the {@link BeanDefinitionParser} from the register implementations using
 	 * the local name of the supplied {@link Element}.
 	 */
+	// 获取元素对应的解析器
 	@Nullable
 	private BeanDefinitionParser findParserForElement(Element element, ParserContext parserContext) {
+		// 标签名称如 component-scan
 		String localName = parserContext.getDelegate().getLocalName(element);
+		// 获取对应的解析器
 		BeanDefinitionParser parser = this.parsers.get(localName);
 		if (parser == null) {
 			parserContext.getReaderContext().fatal(

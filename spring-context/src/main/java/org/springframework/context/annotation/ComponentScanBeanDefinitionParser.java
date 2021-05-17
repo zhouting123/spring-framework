@@ -80,14 +80,20 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 	@Override
 	@Nullable
 	public BeanDefinition parse(Element element, ParserContext parserContext) {
+		// 获取 base-package 值
 		String basePackage = element.getAttribute(BASE_PACKAGE_ATTRIBUTE);
+		// 处理占位符 $ {...}
 		basePackage = parserContext.getReaderContext().getEnvironment().resolvePlaceholders(basePackage);
+		// 处理分隔符
 		String[] basePackages = StringUtils.tokenizeToStringArray(basePackage,
 				ConfigurableApplicationContext.CONFIG_LOCATION_DELIMITERS);
 
 		// Actually scan for bean definitions and register them.
+		// 获取bean定义扫描器
 		ClassPathBeanDefinitionScanner scanner = configureScanner(parserContext, element);
+		// 通过扫描器扫描 `basePackages` 指定包路径下的 BeanDefinition（带有 @Component 注解或其派生注解的 Class 类），并注册
 		Set<BeanDefinitionHolder> beanDefinitions = scanner.doScan(basePackages);
+		// 将已注册的 `beanDefinitions` 在当前 XMLReaderContext 上下文标记为已注册，避免重复注册
 		registerComponents(parserContext.getReaderContext(), beanDefinitions, element);
 
 		return null;
@@ -95,20 +101,25 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 
 	protected ClassPathBeanDefinitionScanner configureScanner(ParserContext parserContext, Element element) {
 		boolean useDefaultFilters = true;
+		// 是否有 use-default-filters 属性
 		if (element.hasAttribute(USE_DEFAULT_FILTERS_ATTRIBUTE)) {
 			useDefaultFilters = Boolean.parseBoolean(element.getAttribute(USE_DEFAULT_FILTERS_ATTRIBUTE));
 		}
 
-		// Delegate bean definition registration to scanner class.
+		// Delegate bean definition registration to scanner class. 将bean 定义注册 委托给扫描类
+		// 创建类路径beanDefinition扫描器
 		ClassPathBeanDefinitionScanner scanner = createScanner(parserContext.getReaderContext(), useDefaultFilters);
+		// 设置beanDefinition默认属性值（懒加载、自动装配模式、初始化方法、销毁方法）
 		scanner.setBeanDefinitionDefaults(parserContext.getDelegate().getBeanDefinitionDefaults());
 		scanner.setAutowireCandidatePatterns(parserContext.getDelegate().getAutowireCandidatePatterns());
 
+		// 如果有资源配置路径属性 resource-pattern属性，默认`**/*.class`
 		if (element.hasAttribute(RESOURCE_PATTERN_ATTRIBUTE)) {
 			scanner.setResourcePattern(element.getAttribute(RESOURCE_PATTERN_ATTRIBUTE));
 		}
 
 		try {
+			// 处理name-generator属性 设置bean名称生成器 ，默认AnnotationBeanNameGenerator
 			parseBeanNameGenerator(element, scanner);
 		}
 		catch (Exception ex) {
@@ -116,12 +127,13 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 		}
 
 		try {
+			// 处理scope-resolver scoped-proxy 属性，设置作用域
 			parseScope(element, scanner);
 		}
 		catch (Exception ex) {
 			parserContext.getReaderContext().error(ex.getMessage(), parserContext.extractSource(element), ex.getCause());
 		}
-
+		// `exclude-filter`、`include-filter` 属性的处理，设置 `.class` 文件的过滤器
 		parseTypeFilters(element, scanner, parserContext);
 
 		return scanner;
@@ -136,13 +148,16 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 			XmlReaderContext readerContext, Set<BeanDefinitionHolder> beanDefinitions, Element element) {
 
 		Object source = readerContext.extractSource(element);
+		// 资源和元素名称 组装为一个混合组件定义对象
 		CompositeComponentDefinition compositeDef = new CompositeComponentDefinition(element.getTagName(), source);
 
+		// 加入从base-package上获取的BeanDefinitionHolder
 		for (BeanDefinitionHolder beanDefHolder : beanDefinitions) {
 			compositeDef.addNestedComponent(new BeanComponentDefinition(beanDefHolder));
 		}
 
 		// Register annotation config processors, if necessary.
+		// 如果有annotation-config属性 且为true，也加入
 		boolean annotationConfig = true;
 		if (element.hasAttribute(ANNOTATION_CONFIG_ATTRIBUTE)) {
 			annotationConfig = Boolean.parseBoolean(element.getAttribute(ANNOTATION_CONFIG_ATTRIBUTE));
@@ -154,7 +169,7 @@ public class ComponentScanBeanDefinitionParser implements BeanDefinitionParser {
 				compositeDef.addNestedComponent(new BeanComponentDefinition(processorDefinition));
 			}
 		}
-
+		// 触发注册事件
 		readerContext.fireComponentRegistered(compositeDef);
 	}
 

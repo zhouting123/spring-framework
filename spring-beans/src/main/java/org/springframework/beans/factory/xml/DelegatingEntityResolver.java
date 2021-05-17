@@ -39,8 +39,10 @@ import org.springframework.util.Assert;
 public class DelegatingEntityResolver implements EntityResolver {
 
 	/** Suffix for DTD files. */
+	// dtd 文件
 	public static final String DTD_SUFFIX = ".dtd";
 
+	// xsd 文件
 	/** Suffix for schema definition files. */
 	public static final String XSD_SUFFIX = ".xsd";
 
@@ -60,6 +62,7 @@ public class DelegatingEntityResolver implements EntityResolver {
 	 */
 	public DelegatingEntityResolver(@Nullable ClassLoader classLoader) {
 		this.dtdResolver = new BeansDtdResolver();
+		// XSD
 		this.schemaResolver = new PluggableSchemaResolver(classLoader);
 	}
 
