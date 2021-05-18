@@ -63,17 +63,22 @@ import org.springframework.util.PatternMatchUtils;
 // 一个bean定义扫描器，它检测类路径上的bean候选者，并使用给定的注册表（ BeanFactory或ApplicationContext ）注册相应的bean定义
 public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateComponentProvider {
 
+	//bean注册中心
 	private final BeanDefinitionRegistry registry;
 
+	// beanDefinition默认配置
 	private BeanDefinitionDefaults beanDefinitionDefaults = new BeanDefinitionDefaults();
 
 	@Nullable
 	private String[] autowireCandidatePatterns;
 
+	// bean名称生成器
 	private BeanNameGenerator beanNameGenerator = AnnotationBeanNameGenerator.INSTANCE;
 
+	// 作用域解析器
 	private ScopeMetadataResolver scopeMetadataResolver = new AnnotationScopeMetadataResolver();
 
+	// 是否设置注解后置处理器
 	private boolean includeAnnotationConfig = true;
 
 
@@ -162,7 +167,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 
 		Assert.notNull(registry, "BeanDefinitionRegistry must not be null");
 		this.registry = registry;
-		// 如果是使用默认过滤器（use-default-filters="true"）,则加入@Component
+		// 如果是使用默认过滤器（use-default-filters="true"）,则注册@Component
 		if (useDefaultFilters) {
 			registerDefaultFilters();
 		}
@@ -249,16 +254,21 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * @param basePackages the packages to check for annotated classes
 	 * @return number of beans registered
 	 */
+	//扫描包
 	public int scan(String... basePackages) {
+		// 获取扫描前的beanDefinition数量
 		int beanCountAtScanStart = this.registry.getBeanDefinitionCount();
 
+		// 进行扫描，将过滤出来的所有.class文件生成的对应beanDefinition并注册
 		doScan(basePackages);
 
 		// Register annotation config processors, if necessary.
+		// 如果 `includeAnnotationConfig` 为 `true`（默认），则注册几个关于注解的 PostProcessor 处理器（关键）
+		// 在其他地方也会注册，内部会进行判断，已注册的处理器不会再注册
 		if (this.includeAnnotationConfig) {
 			AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);
 		}
-
+		// 返回注册数量
 		return (this.registry.getBeanDefinitionCount() - beanCountAtScanStart);
 	}
 
@@ -272,25 +282,35 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 */
 	protected Set<BeanDefinitionHolder> doScan(String... basePackages) {
 		Assert.notEmpty(basePackages, "At least one base package must be specified");
+		// 用于存储本次扫描到的beanDefinition
 		Set<BeanDefinitionHolder> beanDefinitions = new LinkedHashSet<>();
 		for (String basePackage : basePackages) {
 			// 获取候选beanDefinition集合
 			Set<BeanDefinition> candidates = findCandidateComponents(basePackage);
 			for (BeanDefinition candidate : candidates) {
+				// 解析出 @Scope 注解的元信息并设置
 				ScopeMetadata scopeMetadata = this.scopeMetadataResolver.resolveScopeMetadata(candidate);
 				candidate.setScope(scopeMetadata.getScopeName());
+				// 获取beanName
 				String beanName = this.beanNameGenerator.generateBeanName(candidate, this.registry);
 				if (candidate instanceof AbstractBeanDefinition) {
+					// 设置默认属性值
 					postProcessBeanDefinition((AbstractBeanDefinition) candidate, beanName);
 				}
+				// 注解类的beanDefinition
 				if (candidate instanceof AnnotatedBeanDefinition) {
+					// 设置属性值
 					AnnotationConfigUtils.processCommonDefinitionAnnotations((AnnotatedBeanDefinition) candidate);
 				}
+				// 检查是否可以注册
 				if (checkCandidate(beanName, candidate)) {
+					// 封装BeanDefinition为BeanDefinitionHolder
 					BeanDefinitionHolder definitionHolder = new BeanDefinitionHolder(candidate, beanName);
+					// 如果@Scope设置了代理，则再创建一个代理对象的beanDefinitionHolder对象
 					definitionHolder =
 							AnnotationConfigUtils.applyScopedProxyMode(scopeMetadata, definitionHolder, this.registry);
 					beanDefinitions.add(definitionHolder);
+					// 注册beanDefinition
 					registerBeanDefinition(definitionHolder, this.registry);
 				}
 			}
@@ -334,6 +354,7 @@ public class ClassPathBeanDefinitionScanner extends ClassPathScanningCandidateCo
 	 * @throws ConflictingBeanDefinitionException if an existing, incompatible
 	 * bean definition has been found for the specified name
 	 */
+	// 检查给定候选者的Bean名称，以确定是否需要注册相应的Bean定义或与现有定义冲突
 	protected boolean checkCandidate(String beanName, BeanDefinition beanDefinition) throws IllegalStateException {
 		if (!this.registry.containsBeanDefinition(beanName)) {
 			return true;

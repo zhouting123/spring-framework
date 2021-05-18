@@ -69,9 +69,11 @@ public class PluggableSchemaResolver implements EntityResolver {
 	@Nullable
 	private final ClassLoader classLoader;
 
+	// schema映射文件位置
 	private final String schemaMappingsLocation;
 
 	/** Stores the mapping of schema URL -> local schema path. */
+	// 存储schemas文件
 	@Nullable
 	private volatile Map<String, String> schemaMappings;
 
@@ -113,20 +115,24 @@ public class PluggableSchemaResolver implements EntityResolver {
 		}
 
 		if (systemId != null) {
+			// 获取本地映射文件位置
 			String resourceLocation = getSchemaMappings().get(systemId);
 			if (resourceLocation == null && systemId.startsWith("https:")) {
 				// Retrieve canonical http schema mapping even for https declaration
 				resourceLocation = getSchemaMappings().get("http:" + systemId.substring(6));
 			}
 			if (resourceLocation != null) {
+				//创建resource
 				Resource resource = new ClassPathResource(resourceLocation, this.classLoader);
 				try {
+					// 创建inputSource，设置publicId systemId
 					InputSource source = new InputSource(resource.getInputStream());
 					source.setPublicId(publicId);
 					source.setSystemId(systemId);
 					if (logger.isTraceEnabled()) {
 						logger.trace("Found XML schema [" + systemId + "] in classpath: " + resourceLocation);
 					}
+					// 返回source
 					return source;
 				}
 				catch (FileNotFoundException ex) {
@@ -154,12 +160,14 @@ public class PluggableSchemaResolver implements EntityResolver {
 						logger.trace("Loading schema mappings from [" + this.schemaMappingsLocation + "]");
 					}
 					try {
+						// 加载映射文件
 						Properties mappings =
 								PropertiesLoaderUtils.loadAllProperties(this.schemaMappingsLocation, this.classLoader);
 						if (logger.isTraceEnabled()) {
 							logger.trace("Loaded schema mappings: " + mappings);
 						}
 						schemaMappings = new ConcurrentHashMap<>(mappings.size());
+						// 合并映射文件到缓存
 						CollectionUtils.mergePropertiesIntoMap(mappings, schemaMappings);
 						this.schemaMappings = schemaMappings;
 					}

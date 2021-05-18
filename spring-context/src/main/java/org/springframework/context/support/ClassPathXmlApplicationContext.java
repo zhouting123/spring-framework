@@ -51,6 +51,7 @@ import org.springframework.util.Assert;
  */
 public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContext {
 
+	// 配置resource
 	@Nullable
 	private Resource[] configResources;
 
@@ -139,7 +140,8 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 			throws BeansException {
 
 		super(parent);
-		setConfigLocations(configLocations);
+		// 为上下文设置 配置文件location
+		super.setConfigLocations(configLocations);
 		if (refresh) {
 			refresh();
 		}
@@ -195,6 +197,7 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 		super(parent);
 		Assert.notNull(paths, "Path array must not be null");
 		Assert.notNull(clazz, "Class argument must not be null");
+		// xml 配置资源
 		this.configResources = new Resource[paths.length];
 		for (int i = 0; i < paths.length; i++) {
 			this.configResources[i] = new ClassPathResource(paths[i], clazz);

@@ -271,6 +271,7 @@ public class XmlBeanDefinitionReader extends AbstractBeanDefinitionReader {
 	 * if none specified.
 	 */
 	protected EntityResolver getEntityResolver() {
+		// ResourceEntityResolver
 		if (this.entityResolver == null) {
 			// Determine default EntityResolver to use.
 			ResourceLoader resourceLoader = getResourceLoader();

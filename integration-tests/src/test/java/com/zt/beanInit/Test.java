@@ -2,6 +2,9 @@ package com.zt.beanInit;
 
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+import org.springframework.web.context.WebApplicationContext;
 
 /**
  * @author zhouTing
@@ -9,7 +12,7 @@ import org.springframework.beans.factory.xml.XmlBeanDefinitionReader;
  */
 public class Test {
 
-	public static void main(String[] args) {
+	public static void main2(String[] args) {
 		// 创建bean容器
 		DefaultListableBeanFactory factory = new DefaultListableBeanFactory();
 		System.out.println("================创建bean容器结束================");
@@ -23,8 +26,11 @@ public class Test {
 		System.out.println("bean定义加载数量=" + beanDefinitionsCount);
 		// 依赖查找
 		System.out.println(factory.getBean("user"));
+	}
 
-
+	public static void main(String[] args) {
+		ApplicationContext context = new ClassPathXmlApplicationContext("classpath:com.zt/dependency-lookup-context.xml");
+		System.out.println(context.getBean("user"));
 	}
 
 }

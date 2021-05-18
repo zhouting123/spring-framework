@@ -195,12 +195,15 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	private final List<BeanFactoryPostProcessor> beanFactoryPostProcessors = new ArrayList<>();
 
 	/** System time in milliseconds when this context started. */
+	// 容器启动起始时间
 	private long startupDate;
 
 	/** Flag that indicates whether this context is currently active. */
+	// 标记容器是否正在运行阶段
 	private final AtomicBoolean active = new AtomicBoolean();
 
 	/** Flag that indicates whether this context has been closed already. */
+	// 标记容器是否已关闭
 	private final AtomicBoolean closed = new AtomicBoolean();
 
 	/** Synchronization monitor for the "refresh" and "destroy". */
@@ -543,7 +546,9 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 	@Override
 	public void refresh() throws BeansException, IllegalStateException {
+		// 加锁
 		synchronized (this.startupShutdownMonitor) {
+			// 标记开始
 			StartupStep contextRefresh = this.applicationStartup.start("spring.context.refresh");
 
 			// Prepare this context for refreshing.
@@ -616,9 +621,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * active flag as well as performing any initialization of property sources.
 	 */
 	protected void prepareRefresh() {
-		// Switch to active.
+		// 记录启动时间
 		this.startupDate = System.currentTimeMillis();
+		// 标记容器是否已关闭
 		this.closed.set(false);
+		// 标记容器正处于活跃状态
 		this.active.set(true);
 
 		if (logger.isDebugEnabled()) {
@@ -631,10 +638,12 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 
 		// Initialize any placeholder property sources in the context environment.
+		// 初始化占位符
 		initPropertySources();
 
 		// Validate that all properties marked as required are resolvable:
 		// see ConfigurablePropertyResolver#setRequiredProperties
+		// 校验xml文件  AbstractPropertyResolver.validateRequiredProperties()
 		getEnvironment().validateRequiredProperties();
 
 		// Store pre-refresh ApplicationListeners...

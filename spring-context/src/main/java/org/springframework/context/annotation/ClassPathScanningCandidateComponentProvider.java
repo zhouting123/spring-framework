@@ -94,8 +94,10 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 
 	private String resourcePattern = DEFAULT_RESOURCE_PATTERN;
 
+	// 包含过滤器
 	private final List<TypeFilter> includeFilters = new ArrayList<>();
 
+	// 排除过滤器
 	private final List<TypeFilter> excludeFilters = new ArrayList<>();
 
 	@Nullable
@@ -104,12 +106,14 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	@Nullable
 	private ConditionEvaluator conditionEvaluator;
 
+	// 资源加载器，默认PathMatchingResourcePatternResolver
 	@Nullable
 	private ResourcePatternResolver resourcePatternResolver;
 
 	@Nullable
 	private MetadataReaderFactory metadataReaderFactory;
 
+	// 所有 `META-INF/spring.components` 文件的内容
 	@Nullable
 	private CandidateComponentsIndex componentsIndex;
 
@@ -187,6 +191,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	public void resetFilters(boolean useDefaultFilters) {
 		this.includeFilters.clear();
 		this.excludeFilters.clear();
+		// use-default-filter=true
 		if (useDefaultFilters) {
 			registerDefaultFilters();
 		}
@@ -204,6 +209,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	 */
 	@SuppressWarnings("unchecked")
 	protected void registerDefaultFilters() {
+		// 添加 @Component 注解的过滤器（具有层次性），@Component 的派生注解都符合条件
 		this.includeFilters.add(new AnnotationTypeFilter(Component.class));
 		ClassLoader cl = ClassPathScanningCandidateComponentProvider.class.getClassLoader();
 		try {
@@ -264,6 +270,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	public void setResourceLoader(@Nullable ResourceLoader resourceLoader) {
 		this.resourcePatternResolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
 		this.metadataReaderFactory = new CachingMetadataReaderFactory(resourceLoader);
+		// 获取所有 `META-INF/spring.components` 文件中的内容
 		this.componentsIndex = CandidateComponentsIndexLoader.loadIndex(this.resourcePatternResolver.getClassLoader());
 	}
 
@@ -313,6 +320,7 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 			return addCandidateComponentsFromIndex(this.componentsIndex, basePackage);
 		}
 		else {
+			// 扫描到包路径下所有的 .class 文件,并添加所有符合条件的ScannedGenericBeanDefinition
 			return scanCandidateComponents(basePackage);
 		}
 	}
@@ -374,24 +382,31 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 		Set<BeanDefinition> candidates = new LinkedHashSet<>();
 		try {
 			Set<String> types = new HashSet<>();
+			// 根据过滤器从所有 `META-INF/spring.components` 文件中获取所有符合条件的**类名称**
 			for (TypeFilter filter : this.includeFilters) {
 				String stereotype = extractStereotype(filter);
 				if (stereotype == null) {
 					throw new IllegalArgumentException("Failed to extract stereotype from " + filter);
 				}
+				// 获取注解（或类）对应的条目，并过滤出 `basePackage` 包名下的条目（类的名称）
 				types.addAll(index.getCandidateTypes(basePackage, stereotype));
 			}
 			boolean traceEnabled = logger.isTraceEnabled();
 			boolean debugEnabled = logger.isDebugEnabled();
 			for (String type : types) {
+				// 根据这个类名找到 `.class` 文件，通过 ASM（Java 字节码操作和分析框架）获取这个类的所有信息
+				// `metadataReader` 对象中包含 ClassMetadata 类元信息和 AnnotationMetadata 注解元信息
+				// 也就是说根据 `.class` 文件就获取到了这个类的元信息，而不是在 JVM 运行时通过 Class 对象进行操作，提高性能
 				MetadataReader metadataReader = getMetadataReaderFactory().getMetadataReader(type);
 				if (isCandidateComponent(metadataReader)) {
 					ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(metadataReader);
 					sbd.setSource(metadataReader.getResource());
+					// 根据所有的过滤器判断这个类是否符合条件（例如必须标注 @Component 注解或其派生注解）
 					if (isCandidateComponent(sbd)) {
 						if (debugEnabled) {
 							logger.debug("Using candidate component class from index: " + type);
 						}
+						// 符合条件，则添加至 `candidates` 集合
 						candidates.add(sbd);
 					}
 					else {
@@ -416,25 +431,31 @@ public class ClassPathScanningCandidateComponentProvider implements EnvironmentC
 	private Set<BeanDefinition> scanCandidateComponents(String basePackage) {
 		Set<BeanDefinition> candidates = new LinkedHashSet<>();
 		try {
+			// 根据包名生成一个扫描的路径，例如 `classpath*:包路径/**/*.class`
 			String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX +
 					resolveBasePackage(basePackage) + '/' + this.resourcePattern;
+			// 扫描到包路径下所有的 .class 文件
 			Resource[] resources = getResourcePatternResolver().getResources(packageSearchPath);
 			boolean traceEnabled = logger.isTraceEnabled();
 			boolean debugEnabled = logger.isDebugEnabled();
+			// 开始对上一步扫描到的所有 .class 文件（需可读）进行处理，符合条件的类名会解析出一个 ScannedGenericBeanDefinition
 			for (Resource resource : resources) {
 				if (traceEnabled) {
 					logger.trace("Scanning " + resource);
 				}
+				// 可读
 				if (resource.isReadable()) {
 					try {
 						MetadataReader metadataReader = getMetadataReaderFactory().getMetadataReader(resource);
 						if (isCandidateComponent(metadataReader)) {
 							ScannedGenericBeanDefinition sbd = new ScannedGenericBeanDefinition(metadataReader);
 							sbd.setSource(resource);
+							// 根据所有的过滤器判断这个类是否符合条件（例如必须标注 @Component 注解或其派生注解）
 							if (isCandidateComponent(sbd)) {
 								if (debugEnabled) {
 									logger.debug("Identified candidate component class: " + resource);
 								}
+								// 添加到结果集
 								candidates.add(sbd);
 							}
 							else {

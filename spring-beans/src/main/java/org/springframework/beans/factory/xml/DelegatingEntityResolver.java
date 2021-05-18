@@ -86,10 +86,13 @@ public class DelegatingEntityResolver implements EntityResolver {
 			throws SAXException, IOException {
 
 		if (systemId != null) {
+			// dtd 文件
 			if (systemId.endsWith(DTD_SUFFIX)) {
 				return this.dtdResolver.resolveEntity(publicId, systemId);
 			}
+			// xsd 文件
 			else if (systemId.endsWith(XSD_SUFFIX)) {
+				// 默认PluggableSchemaResolver
 				return this.schemaResolver.resolveEntity(publicId, systemId);
 			}
 		}

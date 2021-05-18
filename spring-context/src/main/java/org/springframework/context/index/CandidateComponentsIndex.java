@@ -57,6 +57,7 @@ public class CandidateComponentsIndex {
 		this.index = parseIndex(content);
 	}
 
+	// 將META-INF/spring.component 文件所有組件加載到map
 	private static MultiValueMap<String, Entry> parseIndex(List<Properties> content) {
 		MultiValueMap<String, Entry> index = new LinkedMultiValueMap<>();
 		for (Properties entry : content) {

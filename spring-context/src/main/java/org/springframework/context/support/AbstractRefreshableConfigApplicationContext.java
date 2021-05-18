@@ -39,6 +39,7 @@ import org.springframework.util.StringUtils;
 public abstract class AbstractRefreshableConfigApplicationContext extends AbstractRefreshableApplicationContext
 		implements BeanNameAware, InitializingBean {
 
+	// 配置文件路径
 	@Nullable
 	private String[] configLocations;
 
@@ -121,6 +122,8 @@ public abstract class AbstractRefreshableConfigApplicationContext extends Abstra
 	 * @return the resolved file path
 	 * @see org.springframework.core.env.Environment#resolveRequiredPlaceholders(String)
 	 */
+
+	//classpath:com.zt/dependency-lookup-context.xml
 	protected String resolvePath(String path) {
 		return getEnvironment().resolveRequiredPlaceholders(path);
 	}

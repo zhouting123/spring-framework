@@ -86,9 +86,11 @@ public final class CandidateComponentsIndexLoader {
 		if (classLoaderToUse == null) {
 			classLoaderToUse = CandidateComponentsIndexLoader.class.getClassLoader();
 		}
+		// 加載获取所有 `META-INF/spring.components` 文件中的内容
 		return cache.computeIfAbsent(classLoaderToUse, CandidateComponentsIndexLoader::doLoadIndex);
 	}
 
+	// 加载META-INF/spring.components里所有组件 eg: org.springframework.context.index.Sample3=biz
 	@Nullable
 	private static CandidateComponentsIndex doLoadIndex(ClassLoader classLoader) {
 		if (shouldIgnoreIndex) {
@@ -103,13 +105,16 @@ public final class CandidateComponentsIndexLoader {
 			List<Properties> result = new ArrayList<>();
 			while (urls.hasMoreElements()) {
 				URL url = urls.nextElement();
+				// eg：org.springframework.context.index.Sample3=biz
 				Properties properties = PropertiesLoaderUtils.loadProperties(new UrlResource(url));
 				result.add(properties);
 			}
 			if (logger.isDebugEnabled()) {
 				logger.debug("Loaded " + result.size() + "] index(es)");
 			}
+			// 共获取多少个component组件
 			int totalCount = result.stream().mapToInt(Properties::size).sum();
+			// 結果转换为CandidateComponentsIndex对象
 			return (totalCount > 0 ? new CandidateComponentsIndex(result) : null);
 		}
 		catch (IOException ex) {
