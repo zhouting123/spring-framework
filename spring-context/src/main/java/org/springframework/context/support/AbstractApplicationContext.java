@@ -551,10 +551,13 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 			// 标记开始
 			StartupStep contextRefresh = this.applicationStartup.start("spring.context.refresh");
 
-			// Prepare this context for refreshing.
+			// 准备工作做足：记录启动开始、标记活跃状态、初始化占位符、校验xml文件
 			prepareRefresh();
 
-			// Tell the subclass to refresh the internal bean factory.
+			// 【核心,实例化bean工厂】
+			// 这步比较关键，这步完成后，配置文件就会解析成一个个 BeanDefinition，注册到 BeanFactory 中，
+			// 当然，这里说的 Bean 还没有初始化，只是配置信息都提取出来了，
+			// 注册也只是将这些信息都保存到了注册中心(说到底核心是一个 beanName-> beanDefinition 的 map)
 			ConfigurableListableBeanFactory beanFactory = obtainFreshBeanFactory();
 
 			// Prepare the bean factory for use in this context.
@@ -641,8 +644,6 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// 初始化占位符
 		initPropertySources();
 
-		// Validate that all properties marked as required are resolvable:
-		// see ConfigurablePropertyResolver#setRequiredProperties
 		// 校验xml文件  AbstractPropertyResolver.validateRequiredProperties()
 		getEnvironment().validateRequiredProperties();
 
@@ -677,7 +678,14 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 * @see #getBeanFactory()
 	 */
 	protected ConfigurableListableBeanFactory obtainFreshBeanFactory() {
+		// 刷新bean工厂
+		// <1>. 销毁bean、关闭bean工厂（如果有）
+		// <2>. 初始化DefaultListableBeanFactory实例
+		// <3>. 设置是否允许beanDefinition覆盖、是否允许循环引用
+		// <4>. 【核心】 加载beanDefinition到注册中心
 		refreshBeanFactory();
+
+		// 返回bean工厂
 		return getBeanFactory();
 	}
 
