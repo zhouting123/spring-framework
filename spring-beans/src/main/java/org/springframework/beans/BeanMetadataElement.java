@@ -28,7 +28,7 @@ import org.springframework.lang.Nullable;
 
 public interface BeanMetadataElement {
 // 用于获取定义Bean的源对象，在实现类中通过Object对象保存
-// 所谓源对象就是定义这个Bean的资源 (XML标签对象或者.class文件资源对象)
+// 所谓源对象就是定义这个Bean的资源 XML标签对象或者.class文件资源对象
 
 
 	/**
